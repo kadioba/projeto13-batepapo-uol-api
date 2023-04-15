@@ -3,6 +3,7 @@ import cors from "cors"
 import { MongoClient } from "mongodb"
 import joi from "joi"
 import dayjs from "dayjs"
+import dotenv from "dotenv";
 
 // Criação do servidor
 const app = express()
@@ -10,6 +11,7 @@ const app = express()
 // Configurações
 app.use(express.json())
 app.use(cors())
+dotenv.config();
 
 // Setup do Banco de Dados
 let db
@@ -20,11 +22,13 @@ mongoClient.connect()
 
 app.post("/participants", async (req, res) => {
 
+    console.log(req.body)
     const nameSchema = joi.object({
         name: joi.string().required().min(1)
     })
 
     const validation = nameSchema.validate(req.body, { abortEarly: false })
+    console.log(validation.error)
 
     if (validation.error) {
         const errors = validation.error.details.map((detail) => detail.message)
@@ -37,7 +41,7 @@ app.post("/participants", async (req, res) => {
 
         const name = req.body.name
         const time = Date.now()
-        await db.collection("participants").insertOne({ name: nome, lastStatus: time })
+        await db.collection("participants").insertOne({ name: name, lastStatus: time })
         await db.collection("messages").insertOne(
             {
                 from: name,
