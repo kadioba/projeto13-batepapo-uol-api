@@ -58,6 +58,19 @@ app.post("/participants", async (req, res) => {
     }
 })
 
+app.get("/participants", async (req, res) => {
+
+    try {
+        const participants = await db.collection("participants").find().toArray()
+        console.log(participants)
+        res.send(participants)
+
+    } catch (err) {
+        console.log(err)
+        return res.sendStatus(500)
+    }
+})
+
 app.listen(5000, () => {
     console.log('Server is litening on port 5000.');
 });
