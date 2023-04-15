@@ -47,6 +47,10 @@ app.post("/participants", async (req, res) => {
                 time: dayjs(time).format("HH:mm:ss")
             }
         )
+        res.sendStatus(201)
+    }
+    catch (err) {
+        return res.status(500).send(err.message);
     }
 })
 
