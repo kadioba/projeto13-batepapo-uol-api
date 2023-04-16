@@ -146,6 +146,30 @@ app.get("/messages", async (req, res) => {
 
 })
 
+app.post("/status", async (req, res) => {
+    const user = req.headers.user;
+
+    if (!user) {
+        res.sendStatus(404)
+    }
+
+    try {
+        const userExists = db.collection("participants").findOne({ name: user })
+        if (!userExists) {
+            return res.sendStatus(404)
+        }
+
+        const usuarioEditado = {}
+        usuarioEditado.lastStatus = Date.now()
+        db.collection("participants").updateOne({ name: user }, { $set: usuarioEditado })
+        res.sendStatus(200)
+
+    } catch {
+        console.log(err)
+        return res.status(500).send(err)
+    }
+})
+
 app.listen(5000, () => {
     console.log('Server is litening on port 5000.');
 });
