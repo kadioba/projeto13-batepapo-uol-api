@@ -71,6 +71,40 @@ app.get("/participants", async (req, res) => {
     }
 })
 
+app.post("/messages", async (req, res) => {
+    const user = req.headers.user;
+    console.log(user)
+
+    const messageSchema = joi.object({
+        to: joi.string().required().min(1),
+        text: joi.string().required().min(1),
+        type: joi.string().required().valid('message', 'private_message')
+    })
+
+    const validation = messageSchema.validate(req.body, { abortEarly: false })
+
+    if (validation.error) {
+        const errors = validation.error.details.map((detail) => detail.message)
+        return res.status(422).send(errors);
+    }
+
+    try {
+        const userExists = await db.collection("participants").findOne({ name: user })
+        if (!userExists) {
+            return res.sendStatus(422)
+        }
+
+        await db.collection("messages").insertOne({
+            ...req.body,
+            time: dayjs(time).format("HH:mm:ss"),
+            from: user
+        })
+        res.sendStatus(201)
+    } catch (err) {
+        res.status(500).send(err)
+    }
+})
+
 app.listen(5000, () => {
     console.log('Server is litening on port 5000.');
 });
