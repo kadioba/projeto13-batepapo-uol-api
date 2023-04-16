@@ -22,13 +22,11 @@ mongoClient.connect()
 
 app.post("/participants", async (req, res) => {
 
-    console.log(req.body)
     const nameSchema = joi.object({
         name: joi.string().required().min(1)
     })
 
     const validation = nameSchema.validate(req.body, { abortEarly: false })
-    console.log(validation.error)
 
     if (validation.error) {
         const errors = validation.error.details.map((detail) => detail.message)
@@ -82,6 +80,8 @@ app.post("/messages", async (req, res) => {
     })
 
     const validation = messageSchema.validate(req.body, { abortEarly: false })
+    console.log(validation.error)
+    console.log(req.body)
 
     if (validation.error) {
         const errors = validation.error.details.map((detail) => detail.message)
@@ -89,18 +89,22 @@ app.post("/messages", async (req, res) => {
     }
 
     try {
+        debugger
         const userExists = await db.collection("participants").findOne({ name: user })
+        console.log(userExists)
         if (!userExists) {
             return res.sendStatus(422)
         }
 
-        await db.collection("messages").insertOne({
+        const messageSaved = await db.collection("messages").insertOne({
             ...req.body,
-            time: dayjs(time).format("HH:mm:ss"),
+            time: dayjs().format("HH:mm:ss"),
             from: user
         })
-        res.sendStatus(201)
+        console.log(messageSaved)
+        res.status(201).send(messageSaved)
     } catch (err) {
+        console.log(err)
         res.status(500).send(err)
     }
 })
