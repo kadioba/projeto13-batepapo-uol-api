@@ -132,7 +132,7 @@ app.get("/messages", async (req, res) => {
         }).toArray();
 
         if (limit) {
-            const messages = allMessages.slice((allMessages.length - 1) - limit)
+            const messages = allMessages.slice((allMessages.length) - limit)
             return res.send(messages)
         }
 
