@@ -109,6 +109,43 @@ app.post("/messages", async (req, res) => {
     }
 })
 
+app.get("/messages", async (req, res) => {
+    const user = req.headers.user;
+    const limit = Number(req.query.limit)
+
+    const limitSchema = joi.number().positive().greater(0)
+
+    const validation = limitSchema.validate(limit, { abortEarly: false })
+
+    if (validation.error) {
+        const errors = validation.error.details.map((detail) => detail.message)
+        return res.status(422).send(errors);
+    }
+
+    try {
+        const allMessages = await db.collection("messages").find({
+            $or: [
+                { to: 'Todos' },
+                { to: user },
+                { from: user }
+            ]
+        }).toArray();
+
+        if (limit) {
+            const messages = allMessages.slice((allMessages.length - 1) - limit)
+            return res.send(messages)
+        }
+
+        res.send(allMessages)
+
+    } catch (err) {
+        console.log(err)
+        res.status(500).send(err)
+    }
+
+
+})
+
 app.listen(5000, () => {
     console.log('Server is litening on port 5000.');
 });
