@@ -148,20 +148,22 @@ app.get("/messages", async (req, res) => {
 
 app.post("/status", async (req, res) => {
     const user = req.headers.user;
+    console.log(user)
 
     if (!user) {
-        res.sendStatus(404)
+        return res.sendStatus(404)
     }
 
     try {
-        const userExists = db.collection("participants").findOne({ name: user })
+        const userExists = await db.collection("participants").findOne({ name: user })
         if (!userExists) {
             return res.sendStatus(404)
         }
+        console.log(userExists)
 
         const usuarioEditado = {}
         usuarioEditado.lastStatus = Date.now()
-        db.collection("participants").updateOne({ name: user }, { $set: usuarioEditado })
+        await db.collection("participants").updateOne({ name: user }, { $set: usuarioEditado })
         res.sendStatus(200)
 
     } catch {
