@@ -117,7 +117,7 @@ app.get("/messages", async (req, res) => {
 
     const validation = limitSchema.validate(limit, { abortEarly: false })
 
-    if (validation.error) {
+    if (limit && validation.error) {
         const errors = validation.error.details.map((detail) => detail.message)
         return res.status(422).send(errors);
     }
@@ -171,6 +171,35 @@ app.post("/status", async (req, res) => {
         return res.status(500).send(err)
     }
 })
+
+setInterval(async () => {
+    try {
+        const inactiveUser = await db.collection("participants").find({
+            lastStatus: { $lt: (Date.now() - 10000) }
+        }).toArray();
+
+        const messagesRemoved = inactiveUser.forEach(user => {
+            db.collection("messages").insertOne({
+                from: user.name,
+                to: 'Todos',
+                text: 'sai da sala...',
+                type: 'status',
+                time: dayjs(Date.now()).format("HH:mm:ss")
+            })
+        })
+
+        const removeInativos = await db.collection("participants").deleteMany({
+            $or: [
+                { lastStatus: { $lt: (Date.now() - 10000) } }
+            ]
+        })
+        console.log(removeInativos)
+
+    } catch (err) {
+        console.log(err)
+    }
+
+}, 15000);
 
 app.listen(5000, () => {
     console.log('Server is litening on port 5000.');
