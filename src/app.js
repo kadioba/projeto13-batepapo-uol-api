@@ -111,7 +111,7 @@ app.post("/messages", async (req, res) => {
 
 app.get("/messages", async (req, res) => {
     const user = req.headers.user;
-    const limit = Number(req.query.limit)
+    const limit = req.query.limit
 
     const limitSchema = joi.number().positive().greater(0)
 
